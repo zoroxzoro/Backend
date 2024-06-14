@@ -1,28 +1,26 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 
-export type ControllerType = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => Promise<void>;
-
-export interface NewUserReq {
+export interface NewUserRequestBody {
   name: string;
   email: string;
   photo: string;
   gender: string;
   _id: string;
-  dob: string;
-  role: string;
+  dob: Date;
 }
+
 export interface NewProductRequestBody {
   name: string;
+  category: string;
   price: number;
   stock: number;
-  category: string;
-  photo: string;
-  _id: string;
 }
+
+export type ControllerType = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => Promise<void | Response<any, Record<string, any>>>;
 
 export type SearchRequestQuery = {
   search?: string;
@@ -45,7 +43,7 @@ export type InvalidateCacheProps = {
   product?: boolean;
   order?: boolean;
   admin?: boolean;
-  userId?: string | undefined;
+  userId?: string;
   orderId?: string;
   productId?: string | string[];
 };
@@ -74,6 +72,5 @@ export interface NewOrderRequestBody {
   shippingCharges: number;
   discount: number;
   total: number;
-  quantity: number;
   orderItems: OrderItemType[];
 }

@@ -9,6 +9,7 @@ import {
   getInventories,
 } from "../utils/db.js";
 
+// Define MyDocument interface
 export const getDashboardStats = TryCatch(async (req, res, next) => {
   let stats = {};
 
@@ -283,11 +284,11 @@ export const getPieCharts = TryCatch(async (req, res, next) => {
       burnt,
       marketingCost,
     };
-
     const usersAgeGroup = {
-      teen: allUsers.filter((i) => i.age < 20).length,
-      adult: allUsers.filter((i) => i.age >= 20 && i.age < 40).length,
-      old: allUsers.filter((i) => i.age >= 40).length,
+      teen: allUsers.filter((i) => Number(i.age) < 20).length,
+      adult: allUsers.filter((i) => Number(i.age) >= 20 && Number(i.age) < 40)
+        .length,
+      old: allUsers.filter((i) => Number(i.age) >= 40).length,
     };
 
     const adminCustomer = {
@@ -354,9 +355,9 @@ export const getBarCharts = TryCatch(async (req, res, next) => {
       twelveMonthOrdersPromise,
     ]);
 
-    const productCounts = getChartData({ length: 6, today, docArr: products });
+    const productCounts = getChartData({ length: 6, today, docArr: users });
     const usersCounts = getChartData({ length: 6, today, docArr: users });
-    const ordersCounts = getChartData({ length: 12, today, docArr: orders });
+    const ordersCounts = getChartData({ length: 12, today, docArr: users });
 
     charts = {
       users: usersCounts,
@@ -397,18 +398,18 @@ export const getLineCharts = TryCatch(async (req, res, next) => {
       Order.find(baseQuery).select(["createdAt", "discount", "total"]),
     ]);
 
-    const productCounts = getChartData({ length: 12, today, docArr: products });
+    const productCounts = getChartData({ length: 12, today, docArr: users });
     const usersCounts = getChartData({ length: 12, today, docArr: users });
     const discount = getChartData({
       length: 12,
       today,
-      docArr: orders,
+      docArr: users,
       property: "discount",
     });
     const revenue = getChartData({
       length: 12,
       today,
-      docArr: orders,
+      docArr: users,
       property: "total",
     });
 

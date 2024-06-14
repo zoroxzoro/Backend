@@ -2,12 +2,13 @@ import mongoose from "mongoose";
 import { InvalidateCacheProps, OrderItemType } from "../types/types.js";
 import { myCache } from "../app.js";
 import { Product } from "../models/Products.js";
+
 import { Order } from "../models/Order.model.js";
 export const ConnectDb = () => {
   mongoose.connect(process.env.URI || ""), console.log("db connected");
 };
 
-export const InvalidateCache = ({
+export const invalidateCache = ({
   product,
   order,
   admin,
