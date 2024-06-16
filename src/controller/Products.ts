@@ -1,5 +1,7 @@
-import { Request } from "express";
+import { NextFunction, Request, Response } from "express";
+import { v2 as cloudinary } from "cloudinary";
 import { TryCatch } from "../middleware/error.js";
+import fs from "fs";
 import {
   BaseQuery,
   NewProductRequestBody,
@@ -10,6 +12,8 @@ import ErrorHandler from "../utils/utils_class.js";
 import { rm } from "fs";
 import { myCache } from "../app.js";
 import { invalidateCache } from "../utils/db.js";
+import { singleUpload } from "../middleware/multer.js";
+import { uploadOnCloud } from "../utils/cloudinary.js";
 // import { faker } from "@faker-js/faker";
 
 // Revalidate on New,Update,Delete Product & on New Order
@@ -80,6 +84,11 @@ export const getSingleProduct = TryCatch(async (req, res, next) => {
     product,
   });
 });
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const newProduct = TryCatch(
   async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
@@ -96,12 +105,14 @@ export const newProduct = TryCatch(
       return next(new ErrorHandler("Please enter All Fields", 400));
     }
 
+    const photoo = await uploadOnCloud(photo.path);
+
     await Product.create({
       name,
       price,
       stock,
       category: category.toLowerCase(),
-      photo: photo.path,
+      photo: photoo?.url,
     });
 
     invalidateCache({ product: true, admin: true });

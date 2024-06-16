@@ -1,6 +1,6 @@
 import { TryCatch } from "../middleware/error.js";
 import { Order } from "../models/Order.model.js";
-import { InvalidateCache, reduceStock } from "../utils/db.js";
+import { invalidateCache, reduceStock } from "../utils/db.js";
 import ErrorHandler from "../utils/utils_class.js";
 import { myCache } from "../app.js";
 export const myOrders = TryCatch(async (req, res, next) => {
@@ -64,7 +64,7 @@ export const newOrder = TryCatch(async (req, res, next) => {
         total,
     });
     await reduceStock(orderItems);
-    InvalidateCache({
+    invalidateCache({
         product: true,
         order: true,
         admin: true,
@@ -93,7 +93,7 @@ export const processOrder = TryCatch(async (req, res, next) => {
             break;
     }
     await order.save();
-    InvalidateCache({
+    invalidateCache({
         product: false,
         order: true,
         admin: true,
@@ -111,7 +111,7 @@ export const deleteOrder = TryCatch(async (req, res, next) => {
     if (!order)
         return next(new ErrorHandler("Order Not Found", 404));
     await order.deleteOne();
-    InvalidateCache({
+    invalidateCache({
         product: false,
         order: true,
         admin: true,

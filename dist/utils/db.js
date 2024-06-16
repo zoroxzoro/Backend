@@ -4,7 +4,7 @@ import { Product } from "../models/Products.js";
 export const ConnectDb = () => {
     mongoose.connect(process.env.URI || ""), console.log("db connected");
 };
-export const InvalidateCache = ({ product, order, admin, userId, orderId, productId, }) => {
+export const invalidateCache = ({ product, order, admin, userId, orderId, productId, }) => {
     if (product) {
         const productKeys = [
             "latest-products",

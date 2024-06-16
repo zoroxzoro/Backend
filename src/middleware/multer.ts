@@ -1,15 +1,18 @@
 import multer from "multer";
-import { v4 as uuid } from "uuid";
+import { RequestHandler } from "express";
 
+// Set storage engine
 const storage = multer.diskStorage({
-  destination(req, file, callback) {
-    callback(null, "uploads");
+  destination: function (req, file, cb) {
+    cb(null, "./uploads"); // Corrected path
   },
-  filename(req, file, callback) {
-    const id = uuid();
-    const extName = file.originalname.split(".").pop();
-    callback(null, `${id}.${extName}`);
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
   },
 });
 
-export const singleUpload = multer({ storage }).single("photo");
+// Initialize multer with storage configuration
+const upload = multer({ storage: storage });
+
+// Export a single upload middleware for photo field
+export const singleUpload: RequestHandler = upload.single("photo");

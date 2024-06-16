@@ -4,6 +4,7 @@ import { Order } from "../models/Order.model.js";
 import { Product } from "../models/Products.js";
 import { User } from "../models/User.js";
 import { calculatePercentage, getChartData, getInventories, } from "../utils/db.js";
+// Define MyDocument interface
 export const getDashboardStats = TryCatch(async (req, res, next) => {
     let stats = {};
     const key = "admin-stats";
@@ -191,9 +192,10 @@ export const getPieCharts = TryCatch(async (req, res, next) => {
             marketingCost,
         };
         const usersAgeGroup = {
-            teen: allUsers.filter((i) => i.age < 20).length,
-            adult: allUsers.filter((i) => i.age >= 20 && i.age < 40).length,
-            old: allUsers.filter((i) => i.age >= 40).length,
+            teen: allUsers.filter((i) => Number(i.age) < 20).length,
+            adult: allUsers.filter((i) => Number(i.age) >= 20 && Number(i.age) < 40)
+                .length,
+            old: allUsers.filter((i) => Number(i.age) >= 40).length,
         };
         const adminCustomer = {
             admin: adminUsers,
@@ -248,9 +250,9 @@ export const getBarCharts = TryCatch(async (req, res, next) => {
             sixMonthUsersPromise,
             twelveMonthOrdersPromise,
         ]);
-        const productCounts = getChartData({ length: 6, today, docArr: products });
+        const productCounts = getChartData({ length: 6, today, docArr: users });
         const usersCounts = getChartData({ length: 6, today, docArr: users });
-        const ordersCounts = getChartData({ length: 12, today, docArr: orders });
+        const ordersCounts = getChartData({ length: 12, today, docArr: users });
         charts = {
             users: usersCounts,
             products: productCounts,
@@ -283,18 +285,18 @@ export const getLineCharts = TryCatch(async (req, res, next) => {
             User.find(baseQuery).select("createdAt"),
             Order.find(baseQuery).select(["createdAt", "discount", "total"]),
         ]);
-        const productCounts = getChartData({ length: 12, today, docArr: products });
+        const productCounts = getChartData({ length: 12, today, docArr: users });
         const usersCounts = getChartData({ length: 12, today, docArr: users });
         const discount = getChartData({
             length: 12,
             today,
-            docArr: orders,
+            docArr: users,
             property: "discount",
         });
         const revenue = getChartData({
             length: 12,
             today,
-            docArr: orders,
+            docArr: users,
             property: "total",
         });
         charts = {

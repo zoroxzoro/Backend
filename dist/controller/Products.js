@@ -1,9 +1,11 @@
+import { v2 as cloudinary } from "cloudinary";
 import { TryCatch } from "../middleware/error.js";
 import { Product } from "../models/Products.js";
 import ErrorHandler from "../utils/utils_class.js";
 import { rm } from "fs";
 import { myCache } from "../app.js";
-import { InvalidateCache } from "../utils/db.js";
+import { invalidateCache } from "../utils/db.js";
+import { uploadOnCloud } from "../utils/cloudinary.js";
 // import { faker } from "@faker-js/faker";
 // Revalidate on New,Update,Delete Product & on New Order
 export const getlatestProducts = TryCatch(async (req, res, next) => {
@@ -63,6 +65,11 @@ export const getSingleProduct = TryCatch(async (req, res, next) => {
         product,
     });
 });
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 export const newProduct = TryCatch(async (req, res, next) => {
     const { name, price, stock, category } = req.body;
     const photo = req.file;
@@ -74,14 +81,15 @@ export const newProduct = TryCatch(async (req, res, next) => {
         });
         return next(new ErrorHandler("Please enter All Fields", 400));
     }
+    const photoo = await uploadOnCloud(photo.path);
     await Product.create({
         name,
         price,
         stock,
         category: category.toLowerCase(),
-        photo: photo.path,
+        photo: photoo?.url,
     });
-    InvalidateCache({ product: true, admin: true });
+    invalidateCache({ product: true, admin: true });
     return res.status(201).json({
         success: true,
         message: "Product Created Successfully",
@@ -109,7 +117,7 @@ export const updateProduct = TryCatch(async (req, res, next) => {
     if (category)
         product.category = category;
     await product.save();
-    InvalidateCache({
+    invalidateCache({
         product: true,
         productId: String(product._id),
         admin: true,
@@ -127,7 +135,7 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
         console.log("Product Photo Deleted");
     });
     await product.deleteOne();
-    InvalidateCache({
+    invalidateCache({
         product: true,
         productId: String(product._id),
         admin: true,
